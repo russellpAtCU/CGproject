@@ -23,7 +23,6 @@ window.onload = function init()
   
 
   canvas.addEventListener("mousemove", function(ev) {
-    console.log('oki')
     var box=event.target.getBoundingClientRect();
     mousepose = vec2(2*(ev.clientX-box.left)/canvas.width-1,
     2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
@@ -34,30 +33,52 @@ window.onload = function init()
   var radius=10.0;
 
   function render(){
-    requestAnimFrame(render);
+    //requestAnimFrame(render);
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
       g_drawingInfo = onReadComplete(gl, model, g_objDoc);
     }
-    if (!g_drawingInfo) return;
+    if (!g_drawingInfo){
+      console.log("not loaded")
+       return;
+    }
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
 
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
-    V= mult(V, rotateX(90));
-    V= mult(V, rotateZ(-90));
-    V=mult(V, rotateX(-30));
+    //V= mult(V, rotateX(90));
+    //V= mult(V, rotateZ(-90));
+    //V=mult(V, rotateX(-30));
     //V=mult(V,translate(vec3(mousepose, 0.5)));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
     gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
   }
+
+
   // Start reading the OBJ file
-  readOBJFile("hand2.obj", gl, model, 1, true);
-  render();
+  var i = 1;
+  function animateTest(){
+    setTimeout(function() {
+      readOBJFile("animatsion/hand" + i + ".obj", gl, model, 1, true);
+      if(i == 3){
+        readOBJFile("animatsion/monkey" + i + ".obj", gl, model, 1, true);
+      }
+      render();
+      
+      console.log("animatsion/hand" + i + ".obj")
+      i++;                    
+      if (i < 21) {           
+        animateTest();          
+      }
+    }, 500)
+  }
+  animateTest()
+
+  //render();
 }
 
 
@@ -71,7 +92,7 @@ window.onload = function init()
     o.indexBuffer = gl.createBuffer();
     return o;
   }
-  
+
   function createEmptyArrayBuffer(gl, a_attribute, num, type) {
     var buffer = gl.createBuffer(); // Create a buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
