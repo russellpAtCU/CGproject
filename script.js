@@ -18,6 +18,7 @@ window.onload = function init()
   model = initVertexBuffers(gl, program);
   var P = perspective(90.0, 1.0, 0.001, 1000.0);
   var mousepose=vec3(0.0, 0.0, 0.0)
+  
   canvas.addEventListener("mousemove", function(ev) {
     console.log('oki')
     var box=event.target.getBoundingClientRect();
