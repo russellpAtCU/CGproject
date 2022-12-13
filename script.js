@@ -64,12 +64,10 @@ window.onload = function init()
   function animateTest(){
     setTimeout(function() {
       readOBJFile("animatsion/hand" + i + ".obj", gl, model, 1, true);
-      if(i == 3){
-        readOBJFile("animatsion/monkey" + i + ".obj", gl, model, 1, true);
-      }
+
       render();
       
-      console.log("animatsion/hand" + i + ".obj")
+      //console.log("animatsion/hand" + i + ".obj")
       i++;                    
       if (i < 21) {           
         animateTest();          
@@ -127,12 +125,14 @@ window.onload = function init()
       return;
     }
     g_objDoc = objDoc;
+    console.log(g_objDoc.fileName)
   }
 
   function onReadComplete(gl, model, objDoc) {
     // Acquire the vertex coordinates and colors from OBJ file
     var drawingInfo = objDoc.getDrawingInfo();
     // Write date into the buffer object
+
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.vertices,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
