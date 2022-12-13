@@ -2,6 +2,7 @@ window.onload = function init()
 {
   var canvas = document.getElementById("c");
   var gl = canvas.getContext("webgl");
+
   gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
@@ -14,11 +15,13 @@ window.onload = function init()
   program.a_Position = gl.getAttribLocation(program, 'a_Position');
   program.a_Normal = gl.getAttribLocation(program, 'a_Normal');
   program.a_Color = gl.getAttribLocation(program, 'a_Color');
+
   // Prepare empty buffer objects for vertex coordinates, colors, and normals
   model = initVertexBuffers(gl, program);
   var P = perspective(90.0, 1.0, 0.001, 1000.0);
   var mousepose=vec3(0.0, 0.0, 0.0)
   
+
   canvas.addEventListener("mousemove", function(ev) {
     console.log('oki')
     var box=event.target.getBoundingClientRect();
@@ -56,6 +59,9 @@ window.onload = function init()
   readOBJFile("hand2.obj", gl, model, 1, true);
   render();
 }
+
+
+
   // Create a buffer object and perform the initial configuration
   function initVertexBuffers(gl) {
     var o = new Object();
@@ -65,6 +71,7 @@ window.onload = function init()
     o.indexBuffer = gl.createBuffer();
     return o;
   }
+  
   function createEmptyArrayBuffer(gl, a_attribute, num, type) {
     var buffer = gl.createBuffer(); // Create a buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
