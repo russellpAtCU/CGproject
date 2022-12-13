@@ -1,6 +1,6 @@
 # Blender 3.3.1
 # www.blender.org
-mtllib hand.mtl
+mtllib hand1.mtl
 o Cube
 v -0.364266 0.437747 -0.717640
 v 0.707423 0.434372 -0.386945
