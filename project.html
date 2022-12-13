@@ -29,13 +29,13 @@
   varying vec4 v_Normal;
   varying vec2 fTexCoord;
   uniform sampler2D texMap;
+  
   void main() {
-    
     vec4 v_Color;
     float ambientProduct= 0.1;
     float diffuseProduct=1.0;
     float specularProduct=1.0;
-    vec3 emission = vec3(0.0, 0.0, 0.0);
+    vec3 emission = vec3(1.0, 0.5, 0.0);
     float shininess=100.0;
 
     vec3 H = normalize(L + E);
@@ -55,7 +55,8 @@
     float u = 1.0 - atan(v_Normal.z, v_Normal.x) / (2.0 * 3.1415);
 
     v_Color = ambient + diffuse + specular;
-    gl_FragColor = gl_FragColor = v_Color*texture2D(texMap, vec2(u,v));
+    gl_FragColor=v_Color;
+   //gl_FragColor = texture2D(texMap, vec2(u,v));
   }
   </script>
   <script type="text/javascript" src="script.js"></script>

@@ -43,9 +43,9 @@ window.onload = function init()
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
 
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
-    //V= mult(V, rotateX(-90));
-    //V= mult(V, rotateZ(-90));
-    //V=mult(V, rotateX(-30));
+    V= mult(V, rotateX(90));
+    V= mult(V, rotateZ(-90));
+    V=mult(V, rotateX(-30));
     //V=mult(V,translate(vec3(mousepose, 0.5)));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
