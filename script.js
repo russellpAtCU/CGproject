@@ -24,7 +24,7 @@ window.onload = function init()
   var mousepose=(0,0);
   canvas.addEventListener("mousemove", function(ev) {
     var box=ev.target.getBoundingClientRect();
-    mousepose =vec2(2*(canvas.height-ev.clientY+box.top)/canvas.height-1, -2*(ev.clientX-box.left)/canvas.width-1,);
+    mousepose =vec2(2*(ev.clientX-box.left)/canvas.width-1, 2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
   });
     render();
 
@@ -73,12 +73,10 @@ window.onload = function init()
 
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
-
-
-    //V= mult(V, rotateX(90));
-    //V= mult(V, rotateZ(-90));
-    //V=mult(V, rotateX(-30));
-    V=mult(V,translate(vec3(0.0,mousepose)));
+    V= mult(V, rotateX(90));
+    //V= mult(V, rotateZ(180));
+    //V=mult(V, rotateX(10));
+    V=mult(V,translate(vec3(0.0,10*mousepose[0], 10*mousepose[1])));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
