@@ -26,7 +26,7 @@ window.onload = function init()
     var box=event.target.getBoundingClientRect();
     mousepose = vec2(2*(ev.clientX-box.left)/canvas.width-1,
     2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
-    render();
+    //render();
   });
 
   var image = document.createElement('img');
@@ -50,23 +50,31 @@ window.onload = function init()
 
   var beta=0.0;
   var radius=10.0;
+  frame = 1;
+  readOBJFile("animatsion/hand" + frame + ".obj", gl, model, 1, true);
 
-  function render(){
-    //requestAnimFrame(render);
+  //load all models into the arrays and then iterate the offset
+  //requestAnimFrame(render);
+   
+
+  function render(frame){
+    
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
       g_drawingInfo = onReadComplete(gl, model, g_objDoc);
     }
     if (!g_drawingInfo){
       console.log("not loaded")
+      requestAnimFrame(render)
        return;
     }
-
+    frame++;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
-
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
+
+
     //V= mult(V, rotateX(90));
     //V= mult(V, rotateZ(-90));
     //V=mult(V, rotateX(-30));
@@ -75,14 +83,12 @@ window.onload = function init()
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
     gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
+
+    requestAnimFrame(render)
   }
 
-
-  // Start reading the OBJ file
-  readOBJFile("animatsion/handmeshed.obj", gl, model, 1, true);
-  render();
+  render(frame)
 }
-
 
 
   // Create a buffer object and perform the initial configuration
@@ -129,7 +135,6 @@ window.onload = function init()
       return;
     }
     g_objDoc = objDoc;
-    console.log(g_objDoc.fileName)
   }
 
   function onReadComplete(gl, model, objDoc) {
