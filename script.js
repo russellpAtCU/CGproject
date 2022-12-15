@@ -23,7 +23,6 @@ window.onload = function init()
   
 
   canvas.addEventListener("mousemove", function(ev) {
-    console.log('oki')
     var box=event.target.getBoundingClientRect();
     mousepose = vec2(2*(ev.clientX-box.left)/canvas.width-1,
     2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
@@ -53,12 +52,15 @@ window.onload = function init()
   var radius=10.0;
 
   function render(){
-    requestAnimFrame(render);
+    //requestAnimFrame(render);
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
       g_drawingInfo = onReadComplete(gl, model, g_objDoc);
     }
-    if (!g_drawingInfo) return;
+    if (!g_drawingInfo){
+      console.log("not loaded")
+       return;
+    }
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -74,9 +76,31 @@ window.onload = function init()
 
     gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
   }
+
+
   // Start reading the OBJ file
+<<<<<<< HEAD
   readOBJFile("animatsion/handmeshed.obj", gl, model, 1, true);
   render();
+=======
+  var i = 1;
+  function animateTest(){
+    setTimeout(function() {
+      readOBJFile("animatsion/hand" + i + ".obj", gl, model, 1, true);
+
+      render();
+      
+      //console.log("animatsion/hand" + i + ".obj")
+      i++;                    
+      if (i < 21) {           
+        animateTest();          
+      }
+    }, 500)
+  }
+  animateTest()
+
+  //render();
+>>>>>>> 675db2ba69ae7e385885682603cf33acd7403cec
 }
 
 
@@ -90,7 +114,7 @@ window.onload = function init()
     o.indexBuffer = gl.createBuffer();
     return o;
   }
-  
+
   function createEmptyArrayBuffer(gl, a_attribute, num, type) {
     var buffer = gl.createBuffer(); // Create a buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -125,12 +149,14 @@ window.onload = function init()
       return;
     }
     g_objDoc = objDoc;
+    console.log(g_objDoc.fileName)
   }
 
   function onReadComplete(gl, model, objDoc) {
     // Acquire the vertex coordinates and colors from OBJ file
     var drawingInfo = objDoc.getDrawingInfo();
     // Write date into the buffer object
+
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.vertices,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
