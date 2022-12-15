@@ -30,6 +30,25 @@ window.onload = function init()
     render();
   });
 
+  var image = document.createElement('img');
+  image.crossorigin = 'anonymous';
+  image.onload = function () {
+    var texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    //Mipmap should deffinently be used cause without some textures such as mountaind will be very pixeled
+    //(gl.LINEAR_MIPMAP_LINEAR) because it is most versatile using both the best mipmap and
+    //nearest filtering between mipmaps
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.uniform1i(gl.getUniformLocation(program, "texMap"),0);
+  };
+  image.src = 'skintexture.jpg';
+
   var beta=0.0;
   var radius=10.0;
 
@@ -46,9 +65,9 @@ window.onload = function init()
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
 
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
-    V= mult(V, rotateX(90));
-    V= mult(V, rotateZ(-90));
-    V=mult(V, rotateX(-30));
+    //V= mult(V, rotateX(90));
+    //V= mult(V, rotateZ(-90));
+    //V=mult(V, rotateX(-30));
     //V=mult(V,translate(vec3(mousepose, 0.5)));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
@@ -56,7 +75,7 @@ window.onload = function init()
     gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
   }
   // Start reading the OBJ file
-  readOBJFile("hand2.obj", gl, model, 1, true);
+  readOBJFile("animatsion/handmeshed.obj", gl, model, 1, true);
   render();
 }
 

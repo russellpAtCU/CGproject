@@ -7,9 +7,11 @@
   <script id="vertex-shader" type="x-shader/x-vertex">
   attribute vec4 a_Position;
   attribute vec4 a_Normal;
+  attribute vec2 a_TexCoord;
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_ProjectionMatrix;
   varying vec4 v_Normal;
+  varying vec2 fTexCoord;
   varying vec3 N, L, E;
   void main() {
   vec4 lightPosition = vec4(0.0, 0.0, 1.0, 0.0);
@@ -28,7 +30,7 @@
   varying vec3 N, L, E;
   varying vec4 v_Normal;
   varying vec2 fTexCoord;
-  uniform sampler2D texMap;
+  //uniform sampler2D texMap;
   
   void main() {
     
@@ -57,7 +59,7 @@
 
     v_Color = ambient + diffuse + specular;
     gl_FragColor=v_Color;
-   //gl_FragColor = texture2D(texMap, vec2(u,v));
+   //gl_FragColor = texture2D(texMap, fTexCoord);
   }
   </script>
   <script type="text/javascript" src="script.js"></script>
