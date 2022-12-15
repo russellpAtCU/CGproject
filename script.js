@@ -21,13 +21,12 @@ window.onload = function init()
   var P = perspective(90.0, 1.0, 0.001, 1000.0);
   var mousepose=vec3(0.0, 0.0, 0.0)
   
-
+  var mousepose=(0,0);
   canvas.addEventListener("mousemove", function(ev) {
-    var box=event.target.getBoundingClientRect();
-    mousepose = vec2(2*(ev.clientX-box.left)/canvas.width-1,
-    2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
-    render();
+    var box=ev.target.getBoundingClientRect();
+    mousepose =vec2(2*(canvas.height-ev.clientY+box.top)/canvas.height-1, -2*(ev.clientX-box.left)/canvas.width-1,);
   });
+    render();
 
   var image = document.createElement('img');
   image.crossorigin = 'anonymous';
@@ -52,10 +51,11 @@ window.onload = function init()
   var radius=10.0;
 
   function render(){
-    //requestAnimFrame(render);
+    requestAnimFrame(render);
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
       g_drawingInfo = onReadComplete(gl, model, g_objDoc);
+      console.log("here")
     }
     if (!g_drawingInfo){
       console.log("not loaded")
@@ -70,7 +70,7 @@ window.onload = function init()
     //V= mult(V, rotateX(90));
     //V= mult(V, rotateZ(-90));
     //V=mult(V, rotateX(-30));
-    //V=mult(V,translate(vec3(mousepose, 0.5)));
+    V=mult(V,translate(vec3(0.0,mousepose)));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
@@ -79,11 +79,10 @@ window.onload = function init()
 
 
   // Start reading the OBJ file
-<<<<<<< HEAD
-  readOBJFile("animatsion/handmeshed.obj", gl, model, 1, true);
+  
+  readOBJFile("animatsion/hand1.obj", gl, model, 1, true);
   render();
-=======
-  var i = 1;
+ /* var i = 1;
   function animateTest(){
     setTimeout(function() {
       readOBJFile("animatsion/hand" + i + ".obj", gl, model, 1, true);
@@ -100,7 +99,7 @@ window.onload = function init()
   animateTest()
 
   //render();
->>>>>>> 675db2ba69ae7e385885682603cf33acd7403cec
+>>>>>>> 675db2ba69ae7e385885682603cf33acd7403cec*/
 }
 
 
