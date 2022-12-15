@@ -79,28 +79,8 @@ window.onload = function init()
 
 
   // Start reading the OBJ file
-<<<<<<< HEAD
   readOBJFile("animatsion/handmeshed.obj", gl, model, 1, true);
   render();
-=======
-  var i = 1;
-  function animateTest(){
-    setTimeout(function() {
-      readOBJFile("animatsion/hand" + i + ".obj", gl, model, 1, true);
-
-      render();
-      
-      //console.log("animatsion/hand" + i + ".obj")
-      i++;                    
-      if (i < 21) {           
-        animateTest();          
-      }
-    }, 500)
-  }
-  animateTest()
-
-  //render();
->>>>>>> 675db2ba69ae7e385885682603cf33acd7403cec
 }
 
 
