@@ -45,7 +45,7 @@ window.onload = function init()
     //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.uniform1i(gl.getUniformLocation(program, "texMap"),0);
   };
-  image.src = 'skintexture.jpg';
+  image.src = 'skinmesh.jpg';
 
   var beta=0.0;
   var radius=10.0;
