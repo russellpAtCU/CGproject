@@ -25,7 +25,7 @@
   E = normalize(-pos.xyz);
   N = normalize(vec4(a_Normal.xyz, 0.0).xyz);
 
-  gl_Position = u_ProjectionMatrix* u_ModelMatrix*a_Position;
+  gl_Position = u_ProjectionMatrix* u_ModelMatrix * a_Position;
   v_Normal=a_Normal;
   fTexCoord=a_TexCoord;
   //v_Color=a_Color;
@@ -65,8 +65,8 @@
     float u = 1.0 - atan(v_Normal.z, v_Normal.x) / (2.0 * 3.1415);
 
     v_Color = ambient + diffuse + specular;
-    gl_FragColor=v_Color;
-    gl_FragColor =v_Color+texture2D(texMap,fTexCoord);
+    //gl_FragColor=v_Color;
+    gl_FragColor =v_Color*texture2D(texMap,fTexCoord);
   }
   </script>
   <script type="text/javascript" src="script.js"></script>

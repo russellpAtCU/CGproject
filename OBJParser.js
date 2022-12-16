@@ -269,7 +269,7 @@ function onReadMTLFile(fileString, mtl) {
       case 'newmtl': // Read Material chunk
         name = mtl.parseNewmtl(sp);    // Get name
         continue; // Go to the next line
-      case 'Kd':   // Read normal
+      case 'map_kd':   // Read normal
         if (name == "") continue; // Go to the next line because of Error
         var material = mtl.parseRGB(sp, name);
         mtl.materials.push(material);
@@ -454,7 +454,7 @@ var Face = function (materialName) {
 //------------------------------------------------------------------------------
 // DrawInfo Object
 //------------------------------------------------------------------------------
-var DrawingInfo = function (vertices, textures, normals, colors, indices) {
+var DrawingInfo = function (vertices, normals, textures, colors, indices) {
   this.vertices = vertices;
   this.textures = textures;
   this.normals = normals;
