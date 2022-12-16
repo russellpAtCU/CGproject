@@ -17,7 +17,8 @@ var OBJDoc = function (fileName) {
   this.mtls = new Array(0);      // Initialize the property for MTL
   this.objects = new Array(0);   // Initialize the property for Object
   this.vertices = new Array(0);  // Initialize the property for Vertex
-  this.normals = new Array(0);   // Initialize the property for Normal
+  this.textures = new Array(0);   // Initialize the property for Texture
+  this.normals = new Array(0);  // Initialize the property for Normal
 }
 
 // Parsing the OBJ file
@@ -78,6 +79,10 @@ OBJDoc.prototype.parse = function (fileString, scale, reverse) {
         var normal = this.parseNormal(sp);
         this.normals.push(normal);
         continue; // Go to the next line
+      case 'vt':   // Read texture
+        var texture = this.parseTexture(sp, scale);
+        this.textures.push(texture);
+        continue; // Go to the next line
       case 'usemtl': // Read Material name
         currentMaterialName = this.parseUsemtl(sp);
         continue; // Go to the next line
@@ -119,6 +124,12 @@ OBJDoc.prototype.parseNormal = function (sp) {
   return (new Normal(x, y, z));
 }
 
+OBJDoc.prototype.parseTexture = function (sp, scale) {
+  var x = sp.getFloat()* scale;
+  var y = sp.getFloat()* scale;
+  return (new Texture(x, y));
+}
+
 OBJDoc.prototype.parseUsemtl = function (sp) {
   return sp.getWord();
 }
@@ -134,6 +145,11 @@ OBJDoc.prototype.parseFace = function (sp, materialName, vertices, reverse) {
       var vi = parseInt(subWords[0]) - 1;
       if (!isNaN(vi))
         face.vIndices.push(vi);
+    }
+    if (subWords.length >= 2) {
+      var ti = parseInt(subWords[1]) - 1;
+      if (!isNaN(ti))
+        face.tIndices.push(ti);
     }
     if (subWords.length >= 3) {
       var ni = parseInt(subWords[2]) - 1;
@@ -179,24 +195,56 @@ OBJDoc.prototype.parseFace = function (sp, materialName, vertices, reverse) {
   }
   face.normal = new Normal(normal[0], normal[1], normal[2]);
 
+    /*// calc texture
+    var v0 = [
+      vertices[face.vIndices[0]].x,
+      vertices[face.vIndices[0]].y];
+    var v1 = [
+      vertices[face.vIndices[1]].x,
+      vertices[face.vIndices[1]].y];
+    // 面の法線を計算してnormalに設定
+    var texture = calcTexture(v0, v1);
+    // 法線が正しく求められたか調べる
+    if (texture == null) {
+      if (face.vIndices.length >= 3) { // 面が四角形なら別の3点の組み合わせで法線計算
+        var v3 = [
+          vertices[face.vIndices[2]].x,
+          vertices[face.vIndices[2]].y];
+        texture = calcTexture(v1, v2);
+      }
+      if (texture == null) {         // 法線が求められなかったのでY軸方向の法線とする
+        texture = [0.0, 1.0, 0.0];
+      }
+    }
+    if (reverse) {
+      texture[0] = -texture[0];
+      texture[1] = -texture[1];
+    }
+    face.texture = new Texture(texture[0], texture[1]);*/
+
+
+
   // Devide to triangles if face contains over 3 points.
   if (face.vIndices.length > 3) {
     var n = face.vIndices.length - 2;
     var newVIndices = new Array(n * 3);
     var newNIndices = new Array(n * 3);
+    var newTIndices = new Array(n * 2);
     for (var i = 0; i < n; i++) {
       newVIndices[i * 3 + 0] = face.vIndices[0];
       newVIndices[i * 3 + 1] = face.vIndices[i + 1];
       newVIndices[i * 3 + 2] = face.vIndices[i + 2];
+      newTIndices[i * 3 + 0] = face.tIndices[0];
+      newTIndices[i * 3 + 1] = face.tIndices[i + 1];
       newNIndices[i * 3 + 0] = face.nIndices[0];
       newNIndices[i * 3 + 1] = face.nIndices[i + 1];
       newNIndices[i * 3 + 2] = face.nIndices[i + 2];
     }
     face.vIndices = newVIndices;
+    face.tIndices = newTIndices;
     face.nIndices = newNIndices;
   }
   face.numIndices = face.vIndices.length;
-
   return face;
 }
 
@@ -264,6 +312,7 @@ OBJDoc.prototype.getDrawingInfo = function () {
   }
   var numVertices = this.vertices.length;
   var vertices = new Float32Array(numVertices * 3);
+  var textures = new Float32Array(numVertices * 2);
   var normals = new Float32Array(numVertices * 3);
   var colors = new Float32Array(numVertices * 4);
   var indices = new Uint16Array(numIndices);
@@ -302,12 +351,18 @@ OBJDoc.prototype.getDrawingInfo = function () {
           normals[vIdx * 3 + 1] = faceNormal.y;
           normals[vIdx * 3 + 2] = faceNormal.z;
         }
+        // Copy texture
+        var tIdx = face.nIndices[k];
+        var texture = this.textures[vIdx];
+        textures[vIdx * 2 + 0] = texture.x;
+        textures[vIdx * 2 + 1] = texture.y;
+        
         index_indices++;
       }
     }
   }
 
-  return new DrawingInfo(vertices, normals, colors, indices);
+  return new DrawingInfo(vertices, normals, textures, colors, indices);
 }
 
 //------------------------------------------------------------------------------
@@ -355,6 +410,12 @@ var Normal = function (x, y, z) {
   this.z = z;
 }
 
+var Texture = function (x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+
 //------------------------------------------------------------------------------
 // Color Object
 //------------------------------------------------------------------------------
@@ -387,13 +448,15 @@ var Face = function (materialName) {
   if (materialName == null) this.materialName = "";
   this.vIndices = new Array(0);
   this.nIndices = new Array(0);
+  this.tIndices = new Array(0);
 }
 
 //------------------------------------------------------------------------------
 // DrawInfo Object
 //------------------------------------------------------------------------------
-var DrawingInfo = function (vertices, normals, colors, indices) {
+var DrawingInfo = function (vertices, textures, normals, colors, indices) {
   this.vertices = vertices;
+  this.textures = textures;
   this.normals = normals;
   this.colors = colors;
   this.indices = indices;
@@ -492,3 +555,27 @@ function calcNormal(p0, p1, p2) {
   c[0] = x * g; c[1] = y * g; c[2] = z * g;
   return c;
 }
+
+/*function calcTexture(p0, p1) {
+  // v0: a vector from p1 to p0, v1; a vector from p1 to p2
+  var v0 = new Float32Array(3);
+  for (var i = 0; i < 3; i++) {
+    v0[i] = p0[i] - p1[i];
+  }
+
+  // The cross product of v0 and v1
+  var c = new Float32Array(3);
+  c[0] = v0[1] - v0[2];
+  c[1] = v0[2] - v0[0];
+  var x = c[0], y = c[1], g = Math.sqrt(x * x + y * y);
+  if (g) {
+    if (g == 1)
+      return c;
+  } else {
+    c[0] = 0; c[1] = 0;
+    return c;
+  }
+  g = 1 / g;
+  c[0] = x * g; c[1] = y * g;
+  return c;
+}*/
