@@ -14,9 +14,9 @@ window.onload = function init()
 
   program.a_Position = gl.getAttribLocation(program, 'a_Position');
   program.a_Normal = gl.getAttribLocation(program, 'a_Normal');
+  program.a_TexCoord = gl.getAttribLocation(program, 'a_TexCoord');
   program.a_Color = gl.getAttribLocation(program, 'a_Color');
 
-  // Prepare empty buffer objects for vertex coordinates, colors, and normals
   model = initVertexBuffers(gl, program);
   var P = perspective(90.0, 1.0, 0.001, 1000.0);
   var mousepose=vec3(0.0, 0.0, 0.0)
@@ -28,35 +28,35 @@ window.onload = function init()
   });
     render();
 
-  var image = document.createElement('img');
-  image.crossorigin = 'anonymous';
-  image.onload = function () {
-    var texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    //Mipmap should deffinently be used cause without some textures such as mountaind will be very pixeled
-    //(gl.LINEAR_MIPMAP_LINEAR) because it is most versatile using both the best mipmap and
-    //nearest filtering between mipmaps
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-    //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.uniform1i(gl.getUniformLocation(program, "texMap"),0);
-  };
-  image.src = 'skinmesh.jpg';
+    var image = document.createElement('img');
+    image.crossorigin = 'anonymous';
+    image.onload = function () {
+      var texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      //Mipmap should deffinently be used cause without some textures such as mountaind will be very pixeled
+      //(gl.LINEAR_MIPMAP_LINEAR) because it is most versatile using both the best mipmap and
+      //nearest filtering between mipmaps
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.uniform1i(gl.getUniformLocation(program, "texMap"),0);
+    };
+    image.src = 'skinmesh.jpg';
 
   var beta=0.0;
   var radius=10.0;
-  frame = 1;
-  readOBJFile("animatsion/hand" + frame + ".obj", gl, model, 1, true);
+  //frame = 1;
+  readOBJFile("hand.obj", gl, model, 1, true);
 
   //load all models into the arrays and then iterate the offset
   //requestAnimFrame(render);
    
 
-  function render(frame){
+  function render(){
     
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
@@ -68,7 +68,7 @@ window.onload = function init()
       requestAnimFrame(render)
        return;
     }
-    frame++;
+    //frame++;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
@@ -76,7 +76,7 @@ window.onload = function init()
     V= mult(V, rotateX(90));
     //V= mult(V, rotateZ(180));
     //V=mult(V, rotateX(10));
-    V=mult(V,translate(vec3(0.0,10*mousepose[0], 10*mousepose[1])));
+    V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
@@ -85,26 +85,26 @@ window.onload = function init()
     requestAnimFrame(render)
   }
 
-  render(frame)
+  render()
 }
 
-
-  // Create a buffer object and perform the initial configuration
+//Create a buffer object and perform the initial configuration
+function createEmptyArrayBuffer(gl, a_attribute, num, type) {
+  var buffer = gl.createBuffer(); // Create a buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+  gl.enableVertexAttribArray(a_attribute); // Enable the assignment
+  return buffer;
+}
+  // Prepare empty buffer objects for vertex coordinates, normals, texture
   function initVertexBuffers(gl) {
     var o = new Object();
     o.vertexBuffer = createEmptyArrayBuffer(gl, program.a_Position, 3, gl.FLOAT);
     o.normalBuffer = createEmptyArrayBuffer(gl, program.a_Normal, 3, gl.FLOAT);
+    o.texCoordBuffer=createEmptyArrayBuffer(gl, program.a_TexCoord, 2, gl.FLOAT);
     o.colorBuffer = createEmptyArrayBuffer(gl, program.a_Color, 4, gl.FLOAT);
     o.indexBuffer = gl.createBuffer();
     return o;
-  }
-
-  function createEmptyArrayBuffer(gl, a_attribute, num, type) {
-    var buffer = gl.createBuffer(); // Create a buffer object
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
-    gl.enableVertexAttribArray(a_attribute); // Enable the assignment
-    return buffer;
   }
 
   var g_objDoc = null; // Info parsed from OBJ file
@@ -139,10 +139,15 @@ window.onload = function init()
     // Acquire the vertex coordinates and colors from OBJ file
     var drawingInfo = objDoc.getDrawingInfo();
     // Write date into the buffer object
-
+    console.log(drawingInfo.vertices);
+    console.log(drawingInfo.normals);
+    console.log(drawingInfo.textures);
+    console.log(drawingInfo.colors);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.vertices,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.textures, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.texCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.normals, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.colorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.colors, gl.STATIC_DRAW);
@@ -151,3 +156,5 @@ window.onload = function init()
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawingInfo.indices, gl.STATIC_DRAW);
     return drawingInfo;
    }
+
+  
