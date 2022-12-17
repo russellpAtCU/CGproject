@@ -269,12 +269,13 @@ function onReadMTLFile(fileString, mtl) {
       case 'newmtl': // Read Material chunk
         name = mtl.parseNewmtl(sp);    // Get name
         continue; // Go to the next line
-      case 'map_kd':   // Read normal
+      case 'kd':   // Read normal
         if (name == "") continue; // Go to the next line because of Error
         var material = mtl.parseRGB(sp, name);
         mtl.materials.push(material);
         name = "";
         continue; // Go to the next line
+      
     }
   }
   mtl.complete = true;
