@@ -84,20 +84,31 @@ window.onload = function init()
     //frame++;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    var P = perspective(45.0, 1.0, 0.001, 1000.0);
+    //svar pos = vec3(0.0, 0.0, 0.0);
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
-    V = mult(V, rotateY(270))
-    V = mult(V, rotateX(30));
-    //V= mult(V, rotateZ(270));
-    //V=mult(V, rotateX(10));
-    //V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
-
 
     gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(pos));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
     gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
+
+    eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
+    V = mult(V, rotateY(270))
+    V = mult(V, rotateX(30));
+    //V= mult(V, rotateZ(270));
+    //V=mult(V, rotateX(10));
+    //V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
+
+    var temp = vec3(0.0, 0.0, 0.0);
+    gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(temp));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
+
+    gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
+
 
     requestAnimFrame(render)
   }
