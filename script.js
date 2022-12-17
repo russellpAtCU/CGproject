@@ -3,7 +3,7 @@ window.onload = function init()
   var canvas = document.getElementById("c");
   var gl = canvas.getContext("webgl");
 
-  gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
+  gl.clearColor(0.9294, 0.5843, 0.9294, 1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
   gl.enable(gl.CULL_FACE);
@@ -25,12 +25,9 @@ window.onload = function init()
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.generateMipmap(gl.TEXTURE_2D);
-    //Mipmap should deffinently be used cause without some textures such as mountaind will be very pixeled
-    //(gl.LINEAR_MIPMAP_LINEAR) because it is most versatile using both the best mipmap and
-    //nearest filtering between mipmaps
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
     //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.uniform1i(gl.getUniformLocation(program, "texMap"),0);
   };

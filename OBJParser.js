@@ -195,35 +195,6 @@ OBJDoc.prototype.parseFace = function (sp, materialName, vertices, reverse) {
   }
   face.normal = new Normal(normal[0], normal[1], normal[2]);
 
-    /*// calc texture
-    var v0 = [
-      vertices[face.vIndices[0]].x,
-      vertices[face.vIndices[0]].y];
-    var v1 = [
-      vertices[face.vIndices[1]].x,
-      vertices[face.vIndices[1]].y];
-    // 面の法線を計算してnormalに設定
-    var texture = calcTexture(v0, v1);
-    // 法線が正しく求められたか調べる
-    if (texture == null) {
-      if (face.vIndices.length >= 3) { // 面が四角形なら別の3点の組み合わせで法線計算
-        var v3 = [
-          vertices[face.vIndices[2]].x,
-          vertices[face.vIndices[2]].y];
-        texture = calcTexture(v1, v2);
-      }
-      if (texture == null) {         // 法線が求められなかったのでY軸方向の法線とする
-        texture = [0.0, 1.0, 0.0];
-      }
-    }
-    if (reverse) {
-      texture[0] = -texture[0];
-      texture[1] = -texture[1];
-    }
-    face.texture = new Texture(texture[0], texture[1]);*/
-
-
-
   // Devide to triangles if face contains over 3 points.
   if (face.vIndices.length > 3) {
     var n = face.vIndices.length - 2;
@@ -305,7 +276,7 @@ OBJDoc.prototype.findColor = function (name) {
 //------------------------------------------------------------------------------
 // Retrieve the information for drawing 3D model
 OBJDoc.prototype.getDrawingInfo = function () {
-  // Create an arrays for vertex coordinates, normals, colors, and indices
+  // Create an arrays for vertex coordinates, normals,texture, colors, and indices
   var numVertices = 0;
   var numIndices = 0;
   for (var i = 0; i < this.objects.length; i++) {
@@ -318,7 +289,7 @@ OBJDoc.prototype.getDrawingInfo = function () {
   var colors = new Float32Array(numVertices * 4);
   var indices = new Uint16Array(numIndices);
 
-  // Set vertex, normal and color
+  // Set vertex, texture, normal and color
   var index_indices = 0;
   for (var i = 0; i < this.objects.length; i++) {
     var object = this.objects[i];
@@ -410,6 +381,10 @@ var Normal = function (x, y, z) {
   this.y = y;
   this.z = z;
 }
+
+//------------------------------------------------------------------------------
+// Texture Object
+//------------------------------------------------------------------------------
 
 var Texture = function (x, y) {
   this.x = x;
@@ -557,26 +532,3 @@ function calcNormal(p0, p1, p2) {
   return c;
 }
 
-/*function calcTexture(p0, p1) {
-  // v0: a vector from p1 to p0, v1; a vector from p1 to p2
-  var v0 = new Float32Array(3);
-  for (var i = 0; i < 3; i++) {
-    v0[i] = p0[i] - p1[i];
-  }
-
-  // The cross product of v0 and v1
-  var c = new Float32Array(3);
-  c[0] = v0[1] - v0[2];
-  c[1] = v0[2] - v0[0];
-  var x = c[0], y = c[1], g = Math.sqrt(x * x + y * y);
-  if (g) {
-    if (g == 1)
-      return c;
-  } else {
-    c[0] = 0; c[1] = 0;
-    return c;
-  }
-  g = 1 / g;
-  c[0] = x * g; c[1] = y * g;
-  return c;
-}*/
