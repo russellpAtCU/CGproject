@@ -6,28 +6,31 @@
   <script type="text/javascript"src="OBJParser.js"></script>
   <script id="vertex-shader" type="x-shader/x-vertex">
 
-    
   attribute vec4 a_Position;
   attribute vec4 a_Normal;
   attribute vec4 a_Color;
   attribute vec2 a_TexCoord;
+
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_ProjectionMatrix;
+  uniform vec3 u_TranslationMatrix;
+
   varying vec4 v_Normal;
   varying vec2 fTexCoord;
  // varying vec4 v_Color;
   varying vec3 N, L, E;
   void main() {
   vec4 lightPosition = vec4(0.0, 0.0, 1.0, 0.0);
-  vec4 pos=u_ModelMatrix * a_Position;
+  vec4 pos = u_ModelMatrix * a_Position;
 
   L = normalize(lightPosition.xyz -pos.xyz);
   E = normalize(-pos.xyz);
   N = normalize(vec4(a_Normal.xyz, 0.0).xyz);
 
-  gl_Position = u_ProjectionMatrix* u_ModelMatrix * a_Position;
-  v_Normal=a_Normal;
-  fTexCoord=a_TexCoord;
+  vec4 translation = vec4(u_TranslationMatrix, 0);
+  gl_Position = u_ProjectionMatrix* u_ModelMatrix*a_Position + translation;
+  v_Normal = a_Normal;
+  fTexCoord = a_TexCoord;
   //v_Color=a_Color;
   }
   </script>

@@ -37,19 +37,34 @@ window.onload = function init()
   image.src = 'texture/skin.jpg';
 
   model = initVertexBuffers(gl, program);
-  var P = perspective(90.0, 1.0, 0.001, 1000.0);
-  var mousepose=vec3(0.0, 0.0, 0.0)
+  var P = perspective(45.0, 1.0, 0.001, 1000.0);
   
-  var mousepose=(0,0);
+
+  //WORKING HERE-------------------------------//
+  var pos = vec3(0.0, 0.0, 0.0);
   canvas.addEventListener("mousemove", function(ev) {
-    var box=ev.target.getBoundingClientRect();
-    mousepose =vec2(2*(ev.clientX-box.left)/canvas.width-1, 2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
+    var box = ev.target.getBoundingClientRect();
+     var mousepose = vec2(2*(ev.clientX-box.left)/canvas.width-1, 2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
+    pos = vec3(radius*mousepose[0], radius*mousepose[1] - 5.0, 0.0);
+    //pos = vec3(0.0, 0.0, 0.0);
+    
   });
-    render();
+
+  canvas.addEventListener("mousedown", function(ev) {
+    g_objDoc = null;
+    g_drawingInfo = null;
+    readOBJFile("animatsion/hand" + 20 + ".obj", gl, model, 1, true);
+  });
+
+  canvas.addEventListener("mouseup", function(ev) {
+    g_objDoc = null;
+    g_drawingInfo = null;
+    readOBJFile("animatsion/hand" + 1 + ".obj", gl, model, 1, true);
+  });
 
 
   var beta=0.0;
-  var radius=10.0;
+  var radius=20.0;
   //frame = 1;
   readOBJFile("hand.obj", gl, model, 1, true);
 
@@ -74,10 +89,14 @@ window.onload = function init()
 
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
-    V= mult(V, rotateX(90));
-    //V= mult(V, rotateZ(180));
+    V = mult(V, rotateY(270))
+    V = mult(V, rotateX(30));
+    //V= mult(V, rotateZ(270));
     //V=mult(V, rotateX(10));
-    V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
+    //V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
+
+
+    gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(pos));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
@@ -140,10 +159,6 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
     // Acquire the vertex coordinates and colors from OBJ file
     var drawingInfo = objDoc.getDrawingInfo();
     // Write date into the buffer object
-    console.log(drawingInfo.vertices);
-    console.log(drawingInfo.normals);
-    console.log(drawingInfo.textures);
-    console.log(drawingInfo.colors);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, drawingInfo.vertices,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
