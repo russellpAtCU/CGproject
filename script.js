@@ -34,7 +34,7 @@ window.onload = function init()
     //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.uniform1i(gl.getUniformLocation(program, "texMap"),0);
   };
-  image.src = 'skinnew.jpg';
+  image.src = 'earth.jpg';
 
   model = initVertexBuffers(gl, program);
   var P = perspective(45.0, 1.0, 0.001, 1000.0);
