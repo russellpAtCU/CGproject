@@ -39,6 +39,7 @@ window.onload = function init()
 
   //WORKING HERE-------------------------------//
   var pos = vec3(0.0, 0.0, 0.0);
+  var moveFlag = false;
   canvas.addEventListener("mousemove", function(ev) {
     var box = ev.target.getBoundingClientRect();
      var mousepose = vec2(2*(ev.clientX-box.left)/canvas.width-1, 2*(canvas.height-ev.clientY+box.top)/canvas.height-1);
@@ -50,19 +51,22 @@ window.onload = function init()
   canvas.addEventListener("mousedown", function(ev) {
     g_objDoc = null;
     g_drawingInfo = null;
+    moveFlag = true;
     readOBJFile("animatsion/hand" + 20 + ".obj", gl, model, 1, true);
   });
 
   canvas.addEventListener("mouseup", function(ev) {
     g_objDoc = null;
     g_drawingInfo = null;
+    moveFlag = false;
     readOBJFile("animatsion/hand" + 1 + ".obj", gl, model, 1, true);
   });
 
 
   var beta=0.0;
   var radius=20.0;
-  //frame = 1;
+  var temp = vec3(0.0, 0.0, 0.0);
+
   readOBJFile("hand.obj", gl, model, 1, true);
 
   //load all models into the arrays and then iterate the offset
@@ -74,7 +78,7 @@ window.onload = function init()
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
       g_drawingInfo = onReadComplete(gl, model, g_objDoc);
-      console.log("here")
+      console.log("loaded")
     }
     if (!g_drawingInfo){
       console.log("not loaded")
@@ -102,8 +106,14 @@ window.onload = function init()
     //V=mult(V, rotateX(10));
     //V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
 
-    var temp = vec3(0.0, 0.0, 0.0);
+    console.log(dist(pos, temp))
+    if(moveFlag & dist(pos, temp) < 5.0){
+      
+      temp = pos;
+    }
+    
     gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(temp));
+    
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
@@ -138,6 +148,9 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
   var g_objDoc = null; // Info parsed from OBJ file
   var g_drawingInfo = null; // Info for drawing the 3D model with WebGL
 
+  var m_objDoc = null; // Info parsed from OBJ file
+  var m_drawingInfo = null; // Info for drawing the 3D model with WebGL
+
   // Asynchronous file loading (request, parse, send to GPU buffers)
   function readOBJFile(fileName, gl, model, scale, reverse) {
     var request = new XMLHttpRequest();
@@ -160,6 +173,7 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
       console.log("OBJ file parsing error.");
       return;
     }
+    m_objDoc = objDoc
     g_objDoc = objDoc;
   }
 
@@ -181,4 +195,7 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
     return drawingInfo;
    }
 
-  
+function dist(a, b){
+  //console.log(Math.abs(a[0]-b[0]) + Math.abs((a[1])-b[1]));
+  return Math.abs(a[0]-b[0]) + Math.abs((a[1])-b[1]);
+}
