@@ -51,7 +51,8 @@ window.onload = function init()
   canvas.addEventListener("mousedown", function(ev) {
     g_objDoc = null;
     g_drawingInfo = null;
-    moveFlag = true;
+    if(dist(pos, temp) < 5.0)
+      moveFlag = true;
     readOBJFile("animatsion/hand" + 20 + ".obj", gl, model, 1, true);
   });
 
@@ -66,6 +67,7 @@ window.onload = function init()
   var beta=0.0;
   var radius=20.0;
   var temp = vec3(0.0, 0.0, 0.0);
+  
 
   readOBJFile("hand.obj", gl, model, 1, true);
 
@@ -78,13 +80,27 @@ window.onload = function init()
     if (!g_drawingInfo && g_objDoc && g_objDoc.isMTLComplete()) {
       // OBJ and all MTLs are available
       g_drawingInfo = onReadComplete(gl, model, g_objDoc);
-      console.log("loaded")
+      monkeyflag = true
+      console.log("loaded g")
     }
     if (!g_drawingInfo){
-      console.log("not loaded")
+      console.log("not loaded g")
       requestAnimFrame(render)
        return;
     }
+
+
+    // if (!m_drawingInfo && m_objDoc && m_objDoc.isMTLComplete()) {
+    //   // OBJ and all MTLs are available
+    //   m_drawingInfo = onReadComplete(gl, model, m_objDoc);
+    //   monkeyflag = false
+    //   console.log("loaded m")
+    // }
+    // if (!m_drawingInfo){
+    //   console.log("not loaded m")
+    //   requestAnimFrame(render)
+    //    return;
+    // }
     //frame++;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -92,37 +108,31 @@ window.onload = function init()
     //svar pos = vec3(0.0, 0.0, 0.0);
     eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
     var V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
+  
 
+    if(moveFlag){
+      temp = pos;
+    }
+
+    gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(temp));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
+
+    gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
+
+    eye = vec3(radius, 0.0, 0.0);
+    V = mult(V, rotateY(270));
+    V = mult(V, rotateX(30));
+   
+    // V = lookAt(eye,vec3(0.0,0.0,0.0), vec3(0.0,1.0,0.0));
     gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(pos));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
 
     gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
 
-    eye = vec3(radius*Math.cos(beta), 0.0, radius*Math.sin(beta));
-    V = mult(V, rotateY(270))
-    V = mult(V, rotateX(30));
-    //V= mult(V, rotateZ(270));
-    //V=mult(V, rotateX(10));
-    //V=mult(V,translate(vec3(0.0,radius*mousepose[0], radius*mousepose[1])));
-
-    console.log(dist(pos, temp))
-    if(moveFlag & dist(pos, temp) < 5.0){
-      
-      temp = pos;
-    }
-    
-    gl.uniform3fv(gl.getUniformLocation(program, "u_TranslationMatrix"), flatten(temp));
-    
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ProjectionMatrix"), false, flatten(P));
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "u_ModelMatrix"), false, flatten(V));
-
-    gl.drawElements(gl.TRIANGLES, g_drawingInfo.indices.length, gl.UNSIGNED_SHORT, 0);
-
-
     requestAnimFrame(render)
   }
-
   render()
 }
 
@@ -148,9 +158,6 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
   var g_objDoc = null; // Info parsed from OBJ file
   var g_drawingInfo = null; // Info for drawing the 3D model with WebGL
 
-  var m_objDoc = null; // Info parsed from OBJ file
-  var m_drawingInfo = null; // Info for drawing the 3D model with WebGL
-
   // Asynchronous file loading (request, parse, send to GPU buffers)
   function readOBJFile(fileName, gl, model, scale, reverse) {
     var request = new XMLHttpRequest();
@@ -173,7 +180,6 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
       console.log("OBJ file parsing error.");
       return;
     }
-    m_objDoc = objDoc
     g_objDoc = objDoc;
   }
 
@@ -196,6 +202,5 @@ function createEmptyArrayBuffer(gl, a_attribute, num, type) {
    }
 
 function dist(a, b){
-  //console.log(Math.abs(a[0]-b[0]) + Math.abs((a[1])-b[1]));
   return Math.abs(a[0]-b[0]) + Math.abs((a[1])-b[1]);
 }
